@@ -4231,9 +4231,10 @@ document.addEventListener('click', function(e){
   function showView(view) {
     const dashboard = document.getElementById('dashboard-view');
     const creator   = document.getElementById('iep-creator-view');
+    const timeline  = document.getElementById('timeline-view');
 
     // Hide all top-level views
-    [dashboard, creator].forEach(el => el && (el.style.display = 'none'));
+    [dashboard, creator, timeline].forEach(el => el && (el.style.display = 'none'));
 
     // Sidebar active state
     document.querySelectorAll('.sidebar .nav-item').forEach(li => li.classList.remove('active'));
@@ -4254,6 +4255,23 @@ document.addEventListener('click', function(e){
         proc.style.display   = 'none';
         form.style.display   = 'none';
       }
+    } else if (view === 'timeline') {
+      timeline && (timeline.style.display = 'block');
+      document.getElementById('nav-timeline')?.classList.add('active');
+
+      // Mount the standalone timeline content on first open
+      try {
+        const mount = document.getElementById('timeline-standalone-mount');
+        if (mount && mount.childElementCount === 0) {
+          const src = document.querySelector('#pageTL #timelineApp') || document.getElementById('timelineApp');
+          if (src) {
+            const clone = src.cloneNode(true);
+            mount.appendChild(clone);
+          }
+        }
+        // Scroll to top of the view
+        (timeline || window).scrollTo({ top: 0, behavior: 'instant' });
+      } catch(e) { /* ignore */ }
     }
   }
 
@@ -4299,25 +4317,8 @@ document.addEventListener('click', function(e){
 
   /* ===== Timeline from left nav ===== */
   function showTimelineView() {
-    // Open the creator surface
-    showView('iep-creator');
-
-    // Force the form visible
-    const upload = document.getElementById('uploadSection');
-    const proc   = document.getElementById('processingSection');
-    const form   = document.getElementById('iepForm');
-    if (upload) upload.style.display = 'none';
-    if (proc)   proc.style.display   = 'none';
-    if (form)   form.style.display   = 'block';
-
-    // Show ONLY the Timeline page
-    activatePage('pageTL');
-
-    // Scroll to the top of timeline
-    document.getElementById('pageTL')?.scrollIntoView({ behavior: 'instant', block: 'start' });
-
-    // Highlight the nav item
-    document.getElementById('nav-timeline')?.classList.add('active');
+    // Open the clean, standalone timeline view
+    showView('timeline');
   }
   window.showTimelineView = showTimelineView; // for inline onclick, if present
 
