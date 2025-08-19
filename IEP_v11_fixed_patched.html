@@ -4090,12 +4090,12 @@ function showTimelineView() {
     document.getElementById('iep-creator');
 
   if (tlContainer && tlContainer.scrollIntoView) {
-    tlContainer.scrollIntoView({ behavior: 'instant', block: 'start' });
+    tlContainer.scrollIntoView({ behavior: 'auto', block: 'start' });
   }
  // Ensure the form container scrolls to the top of TL
- if (tl && tl.scrollIntoView) tl.scrollIntoView({behavior:'instant', block:'start'});
+ if (tlContainer && tlContainer.scrollIntoView) tlContainer.scrollIntoView({behavior:'auto', block:'start'});
 }
-<script>
+</script><script>
   // One view-switcher for everything
   function showView(which) {
     const dash = document.getElementById('dashboard-view');
@@ -4148,8 +4148,8 @@ function showTimelineView() {
 
       // scroll the form container to the top of TL
       const formContent = pageTL?.closest('.form-content');
-      (formContent || window).scrollTo({ top: 0, behavior: 'instant' });
-      pageTL?.scrollIntoView({ block: 'start', behavior: 'instant' });
+      (formContent || window).scrollTo({ top: 0, behavior: 'auto' });
+      pageTL?.scrollIntoView({ block: 'start', behavior: 'auto' });
       return;
     }
   }
@@ -4302,7 +4302,7 @@ document.addEventListener('click', function(e){
     activatePage('pageTL');
 
     // Scroll to the top of timeline
-    document.getElementById('pageTL')?.scrollIntoView({ behavior: 'instant', block: 'start' });
+    document.getElementById('pageTL')?.scrollIntoView({ behavior: 'auto', block: 'start' });
 
     // Highlight the nav item
     document.getElementById('nav-timeline')?.classList.add('active');
