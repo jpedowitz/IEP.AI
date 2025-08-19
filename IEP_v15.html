@@ -79,8 +79,8 @@
         <span>IEP.AI</span>
       </div>
       <ul class="nav-menu">
-        <li class="nav-item active" onclick="showView('dashboard')"><span>📊</span><span>Dashboard</span></li>
-        <li class="nav-item" onclick="showView('iep-creator')"><span>➕</span><span>Create New IEP</span></li>
+        <li class="nav-item" onclick="showView('dashboard')"><span>📊</span><span>Dashboard</span></li>
+        <li class="nav-item active" onclick="showView('iep-creator')"><span>📝</span><span>IEP Report</span></li>
         <li class="nav-item" onclick="showView('files')"><span>📁</span><span>Files</span></li>
         <li class="nav-item" onclick="openTimelineWindow()"><span>📅</span><span>Timeline Tracker</span></li>
         <li class="nav-item"><span>💬</span><span>Q&A Assistant</span></li>
@@ -104,7 +104,7 @@
       </div>
       <div class="content-area">
         <!-- Dashboard View -->
-        <div id="dashboard-view" class="dashboard-view active">
+        <div id="dashboard-view" class="dashboard-view">
           <div class="card">
             <h2 style="margin:0 0 10px;">Welcome back, Sarah!</h2>
             <p class="form-label" style="margin:0 0 12px; color: var(--text);">Here's your IEP management overview for Montgomery County</p>
@@ -126,26 +126,9 @@
         </div>
 
         <!-- IEP Creator View -->
-        <div id="iep-creator-view" class="iep-creator-view">
-          <div class="upload-section" id="uploadSection">
-            <h2 style="margin-bottom: 10px;">🎙️ Audio to IEP Converter</h2>
-            <div class="upload-area">
-              <div style="font-size: 40px;">📁</div>
-              <h3>Drop your IEP meeting recording here</h3>
-              <p class="form-label">or click to browse</p>
-              <button class="demo-btn" onclick="startDemo()">Run Demo</button>
-            </div>
-          </div>
-          <div class="processing-section" id="processingSection">
-            <div class="processing-step"><div class="spinner"></div><span>Transcribing...</span></div>
-            <div class="processing-step"><div class="spinner"></div><span>Analyzing student needs...</span></div>
-            <div class="processing-step"><div class="spinner"></div><span>Extracting goals...</span></div>
-            <div class="processing-step"><div class="spinner"></div><span>Generating IEP sections...</span></div>
-            <div class="processing-step"><div class="spinner"></div><span>Finalizing document...</span></div>
-          </div>
-
-          <!-- IEP Form (Timeline removed) -->
-          <div class="iep-form-container" id="iepForm">
+        <div id="iep-creator-view" class="iep-creator-view active">
+          <!-- IEP Form (Timeline removed) shown by default -->
+          <div class="iep-form-container" id="iepForm" style="display:block;">
             <div class="form-header">
               <h2>Maryland IEP - Individualized Education Program</h2>
               <p>Generated from IEP Team Meeting - November 15, 2024</p>
@@ -182,18 +165,8 @@
       }
     }
 
-    function startDemo() {
-      const upload = document.getElementById('uploadSection');
-      const proc = document.getElementById('processingSection');
-      const form = document.getElementById('iepForm');
-      upload.style.display = 'none';
-      proc.style.display = 'block';
-      setTimeout(() => {
-        proc.style.display = 'none';
-        form.style.display = 'block';
-        initializeFormTabs();
-      }, 1200);
-    }
+    // Initialize IEP form immediately
+    document.addEventListener('DOMContentLoaded', initializeFormTabs);
 
     function initializeFormTabs() {
       const tabs = document.getElementById('formTabs');
