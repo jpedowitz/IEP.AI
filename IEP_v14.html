@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IEP v14 (Master)</title>
+  <style>
+    html, body { height: 100%; margin: 0; background: #0b1220; }
+    .frame-wrap { position: fixed; inset: 0; }
+    iframe { width: 100%; height: 100%; border: 0; background: #0b1220; }
+  </style>
+</head>
+<body>
+  <div class="frame-wrap">
+    <!-- Load the latest IEP file here -->
+    <iframe id="iep" src="IEP_v11_fixed_patched.html" title="IEP"></iframe>
+  </div>
+
+  <script>
+    (function(){
+      const iep = document.getElementById('iep');
+
+      function injectCss(doc, css) {
+        const style = doc.createElement('style');
+        style.type = 'text/css';
+        style.appendChild(doc.createTextNode(css));
+        doc.head.appendChild(style);
+      }
+
+      function hideTimeline(doc) {
+        // Hard CSS hide as a first guarantee
+        injectCss(doc, `
+          .form-tabs .form-tab[data-page="pageTL"]{ display:none !important; }
+          .form-tabs a.form-tab[data-page="pageTL"]{ display:none !important; }
+          #pageTL{ display:none !important; }
+          #timelineApp{ display:none !important; }
+        `);
+
+        // Try DOM removals as well for cleanliness
+        try {
+          doc.querySelectorAll('.form-tabs .form-tab').forEach(tab => {
+            const page = tab.getAttribute('data-page');
+            const label = (tab.textContent || '').toLowerCase();
+            if (page === 'pageTL' || label.includes('timeline')) tab.remove();
+          });
+        } catch(e) {}
+        try { const page = doc.getElementById('pageTL'); page && page.remove(); } catch(e) {}
+        try { const app  = doc.getElementById('timelineApp'); app && app.remove(); } catch(e) {}
+      }
+
+      function fixLeftNav(doc) {
+        const navMenu = doc.querySelector('.sidebar .nav-menu');
+        if (!navMenu) return;
+
+        const items = Array.from(navMenu.children || []);
+        // Ensure a single Files item exists (after Create New IEP if present)
+        if (!items.some(li => (/\bfiles\b/i).test(li.textContent || ''))) {
+          const filesLi = doc.createElement('li');
+          filesLi.className = 'nav-item';
+          filesLi.innerHTML = '<span>📁</span><span>Files</span>';
+          filesLi.addEventListener('click', () => window.open('files.html','_blank'));
+          if (items[1] && items[1].parentNode === navMenu) {
+            items[1].after(filesLi);
+          } else {
+            navMenu.appendChild(filesLi);
+          }
+        }
+
+        // Make any existing Timeline nav open in a new window
+        const timelineLi = (Array.from(navMenu.querySelectorAll('.nav-item')))
+          .find(li => (/timeline\s*tracker/i).test(li.textContent || ''));
+        if (timelineLi) {
+          timelineLi.onclick = null;
+          timelineLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.open('timeline.html', '_blank');
+          });
+        }
+      }
+
+      function afterLoad() {
+        const doc = iep.contentDocument || iep.contentWindow?.document;
+        if (!doc) return;
+
+        // Run immediately
+        hideTimeline(doc);
+        fixLeftNav(doc);
+
+        // Also retry a few times in case the app hydrates late
+        let tries = 0;
+        const timer = setInterval(() => {
+          tries++;
+          hideTimeline(doc);
+          fixLeftNav(doc);
+          if (tries >= 30) clearInterval(timer);
+        }, 200);
+      }
+
+      iep.addEventListener('load', afterLoad);
+    })();
+  </script>
+</body>
+</html>
+
