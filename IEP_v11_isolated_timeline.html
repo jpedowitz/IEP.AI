@@ -71,7 +71,7 @@
 
         /* Right Sidebar */
         .right-sidebar {
-            width: 300px;
+            width: 380px;
             background: #FFFFFF;
             box-shadow: -2px 0 10px rgba(0,0,0,0.05);
             padding: 2rem 1.5rem;
@@ -88,7 +88,7 @@
             display: flex;
             flex-direction: column;
             background: #F7F8FA;
-            max-width: calc(100vw - 550px);
+            max-width: calc(100vw - 250px);
         }
 
         .main-content.full-width {
@@ -809,6 +809,18 @@ body.iep-has-sidebar .app-shell{margin-left:210px}
 <div class="notification-badge">3</div>
 </div>
 <span>👤 Sarah Johnson</span>
+<!-- Standalone Timeline View (clean container) -->
+<div class="timeline-view" id="timeline-view" style="display:none;">
+  <div class="form-header">
+    <h2>Timeline Tracker</h2>
+    <p>Key dates and deadlines</p>
+  </div>
+  <div class="form-content">
+    <div class="form-section">
+      <div id="timeline-standalone-mount"></div>
+    </div>
+  </div>
+  
 </div>
 </div>
 <div class="content-area">
@@ -893,7 +905,7 @@ body.iep-has-sidebar .app-shell{margin-left:210px}
 <h2>Maryland IEP - Individualized Education Program</h2>
 <p>Generated from IEP Team Meeting - November 15, 2024</p>
 </div>
-<div class="form-tabs"><a class="form-tab" data-page="pageTL" href="#">Timeline (Interactive)</a>
+<div class="form-tabs">
 <button class="form-tab active" data-page="page1">Page 1: Student Information</button>
 <button class="form-tab" data-page="page2">Page 2: Meeting &amp; Identifying Info</button>
 <button class="form-tab" data-page="page3">Page 3: Meeting &amp; Identifying Info </button>
@@ -905,7 +917,7 @@ body.iep-has-sidebar .app-shell{margin-left:210px}
 <button class="form-tab" data-page="page9">Page 9: Present Levels</button>
 <button class="form-tab" data-page="page10">Page 10: Services</button>
 <a class="form-tab" data-page="page11" href="#">Page 11: Special Considerations II</a><a class="form-tab" data-page="page12" href="#">Page 12: Accessibility Features I</a><a class="form-tab" data-page="page13" href="#">Page 13: Accessibility Features II</a><a class="form-tab" data-page="page14" href="#">Page 14: Accommodations: Presentation</a><a class="form-tab" data-page="page15" href="#">Page 15: Accommodations: Response</a><a class="form-tab" data-page="page16" href="#">Page 16: Timing Accommodations</a><a class="form-tab" data-page="page17" href="#">Page 17: Instructional Supports</a><a class="form-tab" data-page="page18" href="#">Page 18: Program Modifications</a><a class="form-tab" data-page="page19" href="#">Page 19: Social/Behavior Supports</a><a class="form-tab" data-page="page20" href="#">Page 20: Physical/Environmental Supports</a><a class="form-tab" data-page="page21" href="#">Page 21: School Personnel/Parental Supports</a><a class="form-tab" data-page="page22" href="#">Page 22: Extended School Year (ESY)</a><a class="form-tab" data-page="page23" href="#">Page 23: Transition – Preferences &amp; Goals</a><a class="form-tab" data-page="page24" href="#">Page 24: Transition Activities I</a><a class="form-tab" data-page="page25" href="#">Page 25: Transition Activities II</a><a class="form-tab" data-page="page26" href="#">Page 26: Transition Activities III</a><a class="form-tab" data-page="page27" href="#">Page 27: Transition Agency Linkage</a><a class="form-tab" data-page="page28" href="#">Page 28: Goals – Goal Sheet</a><a class="form-tab" data-page="page29" href="#">Page 29: Services – Special Education</a><a class="form-tab" data-page="page30" href="#">Page 30: Services – Related Services</a><a class="form-tab" data-page="page31" href="#">Page 31: Services – CTE</a><a class="form-tab" data-page="page32" href="#">Page 32: Placement Data (LRE)</a><a class="form-tab" data-page="page33" href="#">Page 33: Authorization – Consent</a><a class="form-tab" data-page="page34" href="#">Page 34: Authorization – Medical Assistance</a></div>
-<div class="form-content"><div class="form-page" id="pageTL" style="display:none;"><div class="form-section"><h3 class="section-title">Interactive IEP Timeline</h3><div class="form-row-3">
+<div class="form-content"><div class="form-page" id="pageTL" style="display:none;"><div class="form-section" style="display:none;"><h3 class="section-title">Interactive IEP Timeline</h3><div class="form-row-3">
 <div class="form-group">
 <label class="form-label">Name:</label>
 <input class="form-input" readonly="" type="text" value="Thompson, Michael J."/>
@@ -4219,9 +4231,10 @@ document.addEventListener('click', function(e){
   function showView(view) {
     const dashboard = document.getElementById('dashboard-view');
     const creator   = document.getElementById('iep-creator-view');
+    const timeline  = document.getElementById('timeline-view');
 
     // Hide all top-level views
-    [dashboard, creator].forEach(el => el && (el.style.display = 'none'));
+    [dashboard, creator, timeline].forEach(el => el && (el.style.display = 'none'));
 
     // Sidebar active state
     document.querySelectorAll('.sidebar .nav-item').forEach(li => li.classList.remove('active'));
@@ -4242,6 +4255,23 @@ document.addEventListener('click', function(e){
         proc.style.display   = 'none';
         form.style.display   = 'none';
       }
+    } else if (view === 'timeline') {
+      timeline && (timeline.style.display = 'block');
+      document.getElementById('nav-timeline')?.classList.add('active');
+
+      // Mount the standalone timeline content on first open
+      try {
+        const mount = document.getElementById('timeline-standalone-mount');
+        if (mount && mount.childElementCount === 0) {
+          const src = document.querySelector('#pageTL #timelineApp') || document.getElementById('timelineApp');
+          if (src) {
+            const clone = src.cloneNode(true);
+            mount.appendChild(clone);
+          }
+        }
+        // Scroll to top of the view
+        (timeline || window).scrollTo({ top: 0, behavior: 'instant' });
+      } catch(e) { /* ignore */ }
     }
   }
 
@@ -4287,25 +4317,16 @@ document.addEventListener('click', function(e){
 
   /* ===== Timeline from left nav ===== */
   function showTimelineView() {
-    // Open the creator surface
-    showView('iep-creator');
-
-    // Force the form visible
-    const upload = document.getElementById('uploadSection');
-    const proc   = document.getElementById('processingSection');
-    const form   = document.getElementById('iepForm');
-    if (upload) upload.style.display = 'none';
-    if (proc)   proc.style.display   = 'none';
-    if (form)   form.style.display   = 'block';
-
-    // Show ONLY the Timeline page
-    activatePage('pageTL');
-
-    // Scroll to the top of timeline
-    document.getElementById('pageTL')?.scrollIntoView({ behavior: 'instant', block: 'start' });
-
-    // Highlight the nav item
-    document.getElementById('nav-timeline')?.classList.add('active');
+    // Open the clean, standalone timeline view and mount content if needed
+    showView('timeline');
+    try {
+      const mount = document.getElementById('timeline-standalone-mount');
+      if (mount && mount.childElementCount === 0) {
+        const src = document.querySelector('#pageTL #timelineApp') || document.getElementById('timelineApp');
+        if (src) mount.appendChild(src.cloneNode(true));
+      }
+      document.getElementById('timeline-view')?.scrollIntoView({behavior:'instant', block:'start'});
+    } catch(e) { /* no-op */ }
   }
   window.showTimelineView = showTimelineView; // for inline onclick, if present
 
