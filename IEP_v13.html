@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IEP v13</title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body { background: #0b1220; }
+    .frame-wrap { position: fixed; inset: 0; }
+    .app-frame { width: 100%; height: 100%; border: 0; background: #0b1220; }
+  </style>
+</head>
+<body>
+  <div class="frame-wrap">
+    <iframe id="app" class="app-frame" src="IEP_v11_fixed_patched.html"></iframe>
+  </div>
+
+  <script>
+  (function(){
+    const iframe = document.getElementById('app');
+    iframe.addEventListener('load', () => {
+      const win = iframe.contentWindow;
+      const doc = iframe.contentDocument || win.document;
+      if (!doc) return;
+
+      // 1) Remove Timeline tab from IEP form
+      try {
+        const formTabs = doc.querySelector('.form-tabs');
+        if (formTabs) {
+          // Remove any tab that targets pageTL or says Timeline
+          Array.from(formTabs.querySelectorAll('.form-tab')).forEach(tab => {
+            const page = tab.getAttribute('data-page');
+            const label = (tab.textContent || '').toLowerCase();
+            if (page === 'pageTL' || label.includes('timeline')) {
+              tab.remove();
+            }
+          });
+        }
+      } catch (e) { /* no-op */ }
+
+      // 2) Remove the timeline page from the form content entirely
+      try {
+        const tlPage = doc.getElementById('pageTL');
+        if (tlPage && tlPage.parentNode) tlPage.parentNode.removeChild(tlPage);
+      } catch (e) { /* no-op */ }
+
+      // Also remove any standalone timeline app block if present
+      try {
+        const tlApp = doc.getElementById('timelineApp');
+        if (tlApp && tlApp.parentNode) tlApp.parentNode.removeChild(tlApp);
+      } catch (e) { /* no-op */ }
+
+      // 3) Add a single Files tab to the left nav, and make Timeline open its own window
+      try {
+        const navMenu = doc.querySelector('.sidebar .nav-menu');
+        if (navMenu) {
+          const items = Array.from(navMenu.children || []);
+
+          // Add Files item once (after "Create New IEP" if present)
+          const hasFiles = items.some(li => (/\bfiles\b/i).test(li.textContent || ''));
+          if (!hasFiles) {
+            const filesLi = doc.createElement('li');
+            filesLi.className = 'nav-item';
+            filesLi.innerHTML = '<span>📁</span><span>Files</span>';
+            filesLi.addEventListener('click', function(){ window.open('files.html','_blank'); });
+            if (items[1] && items[1].parentNode === navMenu) {
+              items[1].after(filesLi);
+            } else {
+              navMenu.appendChild(filesLi);
+            }
+          }
+
+          // Force Timeline nav to open external window
+          const timelineItem = (Array.from(navMenu.querySelectorAll('.nav-item')))
+            .find(li => (/timeline\s*tracker/i).test(li.textContent || ''));
+          if (timelineItem) {
+            timelineItem.setAttribute('onclick', '');
+            timelineItem.addEventListener('click', function(e){
+              e.preventDefault();
+              window.open('timeline.html','_blank');
+            });
+          }
+        }
+      } catch (e) { /* no-op */ }
+    });
+  })();
+  </script>
+</body>
+</html>
+

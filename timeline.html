@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timeline Tracker</title>
+  <style>
+    html, body { height: 100%; margin: 0; background: #0b1220; color: #e8eef8; }
+    .frame { position: fixed; inset: 0; border: 0; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <iframe id="app" class="frame" src="IEP_v11_fixed_patched.html"></iframe>
+  <script>
+  (function(){
+    const frame = document.getElementById('app');
+    frame.addEventListener('load', () => {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument || win.document;
+      if (!doc) return;
+
+      // Ensure IEP creator is visible
+      try {
+        const showView = win.showView || win.parent?.showView;
+        if (typeof showView === 'function') showView('iep-creator');
+      } catch(e) {}
+
+      // Hide upload/processing, show form
+      try {
+        const upload = doc.getElementById('uploadSection');
+        const proc   = doc.getElementById('processingSection');
+        const form   = doc.getElementById('iepForm');
+        if (upload) upload.style.display = 'none';
+        if (proc)   proc.style.display   = 'none';
+        if (form)   form.style.display   = 'block';
+      } catch(e) {}
+
+      // If a built-in function to show timeline exists, use it; else fall back to hash
+      try {
+        if (typeof win.showTimelineView === 'function') {
+          win.showTimelineView();
+        } else {
+          // Fallback: activate pageTL via hash and click
+          const tlTab = doc.querySelector('.form-tab[data-page="pageTL"]');
+          if (tlTab) {
+            tlTab.click();
+          } else {
+            // As a last resort, scroll any timeline app into view
+            const tlPage = doc.getElementById('pageTL') || doc.getElementById('timelineApp');
+            tlPage?.scrollIntoView({ behavior: 'instant', block: 'start' });
+          }
+        }
+      } catch(e) {}
+    });
+  })();
+  </script>
+</body>
+</html>
+
