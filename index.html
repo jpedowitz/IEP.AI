@@ -304,26 +304,10 @@
   </div>
 </div>
 </div>
-<!-- Right Sidebar -->
-<div class="right-sidebar" id="rightSidebar">
-  <div class="quick-actions">
-    <h3 style="margin-bottom: 1rem; color: #000000;">Quick Actions</h3>
-    <button class="quick-action-btn">📝 Create New IEP</button>
-    <button class="quick-action-btn">📅 Schedule Meeting</button>
-    <button class="quick-action-btn">📊 Generate Report</button>
-    <button class="quick-action-btn">💬 Start Q&amp;A Chat</button>
-  </div>
-  <div class="notifications">
-    <h3 style="margin-bottom: 1rem; color: #000000;">Notifications</h3>
-    <div class="notification-item">🔔 IEP due: Sarah Williams - Nov 25</div>
-    <div class="notification-item">📅 Meeting tomorrow: 2:00 PM</div>
-    <div class="notification-item">✅ Review completed: John Davis</div>
-  </div>
-</div>
+<!-- Right Sidebar removed for single-left-nav layout -->
 
 <script>
   function showView(viewName) {
-    const rightSidebar = document.getElementById('rightSidebar');
     const mainContent = document.querySelector('.main-content');
     const dash = document.getElementById('dashboard-view');
     const creator = document.getElementById('iep-creator-view');
@@ -337,15 +321,12 @@
 
     if (viewName === 'dashboard') {
       dash.classList.add('active');
-      rightSidebar.classList.remove('hidden');
       mainContent.classList.remove('full-width');
     } else if (viewName === 'iep-creator') {
       creator.classList.add('active');
-      rightSidebar.classList.add('hidden');
       mainContent.classList.add('full-width');
     } else if (viewName === 'timeline') {
       timeline.classList.add('active');
-      rightSidebar.classList.add('hidden');
       mainContent.classList.add('full-width');
       ensureStandaloneTimeline();
     }
