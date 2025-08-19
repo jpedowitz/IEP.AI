@@ -3,6 +3,410 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IEP.AI - Maryland IEP Management Platform (v15)</title>
+  <style>
+    :root {
+      --bg: #F3F4F6;
+      --card: #FFFFFF;
+      --text: #111827;
+      --muted: #6B7280;
+      --brand: #000000;
+      --accent: #00D563;
+      --border: #E5E7EB;
+      --sidebar-bg: #000000;
+      --sidebar-text: #FFFFFF;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+    .dashboard-container { display: grid; grid-template-columns: 250px 1fr; min-height: 100%; }
+    .sidebar { background: var(--sidebar-bg); color: var(--sidebar-text); padding: 16px 12px; display: flex; flex-direction: column; gap: 12px; }
+    .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; }
+    .nav-menu { list-style: none; margin: 0; padding: 8px 0 0; display: flex; flex-direction: column; gap: 6px; }
+    .nav-item { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 12px; border-radius: 10px; }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.08); }
+    .nav-item span:first-child { width: 20px; text-align: center; }
+    .main-content { display: flex; flex-direction: column; }
+    .top-bar { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .search-bar { display: flex; align-items: center; gap: 8px; color: var(--muted); border: 1px solid var(--border); padding: 8px 12px; border-radius: 10px; background: #FFFFFF; }
+    .search-bar input { border: 0; outline: 0; min-width: 320px; }
+    .user-info { display: flex; align-items: center; gap: 12px; color: var(--text); }
+    .content-area { padding: 16px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .dashboard-view, .iep-creator-view, .files-view { display: none; }
+    .dashboard-view.active, .iep-creator-view.active, .files-view.active { display: block; }
+
+    /* IEP creator */
+    .upload-section { border: 2px dashed var(--border); border-radius: 12px; padding: 20px; background: #FFFFFF; text-align: center; }
+    .upload-area { padding: 16px 0; }
+    .demo-btn { background: var(--accent); color: #001b0e; border: 0; border-radius: 10px; padding: 10px 14px; cursor: pointer; font-weight: 700; }
+    .processing-section { display: none; margin-top: 16px; }
+    .processing-step { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; background: #F9FAFB; }
+    .spinner { width: 16px; height: 16px; border: 3px solid #E5E7EB; border-top-color: var(--accent); border-radius: 999px; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* IEP form */
+    .iep-form-container { display: none; margin-top: 16px; }
+    .form-header h2 { margin: 0 0 6px; }
+    .form-header p { margin: 0; color: var(--muted); }
+    .form-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .form-tab { background: #FFFFFF; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; cursor: pointer; }
+    .form-tab.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,213,99,.18); }
+    .form-content { margin-top: 12px; }
+    .form-page { display: none; }
+    .form-page.active { display: block; }
+    .form-section { margin-bottom: 14px; }
+    .section-title { margin: 0 0 8px; font-size: 16px; color: var(--text); }
+    .form-row-3, .form-row-2, .form-row-4 { display: grid; gap: 10px; }
+    .form-row-3 { grid-template-columns: repeat(3, 1fr); }
+    .form-row-2 { grid-template-columns: repeat(2, 1fr); }
+    .form-row-4 { grid-template-columns: repeat(4, 1fr); }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-weight: 600; color: var(--muted); }
+    .form-input, .form-textarea { border: 1px solid var(--border); border-radius: 10px; padding: 10px; background: #FFFFFF; }
+
+    /* Files view */
+    .file-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+    .file-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: #FFFFFF; }
+    .btn { background: var(--accent); color: #001b0e; border: 0; border-radius: 10px; padding: 8px 12px; cursor: pointer; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <span>🎓</span>
+        <span>IEP.AI</span>
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item active" onclick="showView('dashboard')"><span>📊</span><span>Dashboard</span></li>
+        <li class="nav-item" onclick="showView('iep-creator')"><span>➕</span><span>Create New IEP</span></li>
+        <li class="nav-item" onclick="showView('files')"><span>📁</span><span>Files</span></li>
+        <li class="nav-item" onclick="openTimelineWindow()"><span>📅</span><span>Timeline Tracker</span></li>
+        <li class="nav-item"><span>💬</span><span>Q&A Assistant</span></li>
+        <li class="nav-item"><span>📚</span><span>Resources</span></li>
+        <li class="nav-item"><span>👥</span><span>Meeting Coordination</span></li>
+        <li class="nav-item"><span>📈</span><span>Reports</span></li>
+        <li class="nav-item"><span>⚙️</span><span>Settings</span></li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="top-bar">
+        <div class="search-bar">
+          <span>🔍</span>
+          <input type="text" placeholder="Search students, IEPs, or documents..." />
+        </div>
+        <div class="user-info">
+          <span>👤 Sarah Johnson</span>
+        </div>
+      </div>
+      <div class="content-area">
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="dashboard-view active">
+          <div class="card">
+            <h2 style="margin:0 0 10px;">Welcome back, Sarah!</h2>
+            <p class="form-label" style="margin:0 0 12px; color: var(--text);">Here's your IEP management overview for Montgomery County</p>
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+              <div class="card"><div style="font-size:28px; font-weight:800;">47</div><div class="form-label">Active IEPs</div></div>
+              <div class="card"><div style="font-size:28px; font-weight:800;">12</div><div class="form-label">Due This Month</div></div>
+              <div class="card"><div style="font-size:28px; font-weight:800;">8</div><div class="form-label">Meetings Scheduled</div></div>
+              <div class="card"><div style="font-size:28px; font-weight:800;">3</div><div class="form-label">Pending Reviews</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Files View (single tab in left nav) -->
+        <div id="files-view" class="files-view">
+          <div class="card">
+            <h2 style="margin:0 0 10px;">Files</h2>
+            <ul id="filesList" class="file-list"></ul>
+          </div>
+        </div>
+
+        <!-- IEP Creator View -->
+        <div id="iep-creator-view" class="iep-creator-view">
+          <div class="upload-section" id="uploadSection">
+            <h2 style="margin-bottom: 10px;">🎙️ Audio to IEP Converter</h2>
+            <div class="upload-area">
+              <div style="font-size: 40px;">📁</div>
+              <h3>Drop your IEP meeting recording here</h3>
+              <p class="form-label">or click to browse</p>
+              <button class="demo-btn" onclick="startDemo()">Run Demo</button>
+            </div>
+          </div>
+          <div class="processing-section" id="processingSection">
+            <div class="processing-step"><div class="spinner"></div><span>Transcribing...</span></div>
+            <div class="processing-step"><div class="spinner"></div><span>Analyzing student needs...</span></div>
+            <div class="processing-step"><div class="spinner"></div><span>Extracting goals...</span></div>
+            <div class="processing-step"><div class="spinner"></div><span>Generating IEP sections...</span></div>
+            <div class="processing-step"><div class="spinner"></div><span>Finalizing document...</span></div>
+          </div>
+
+          <!-- IEP Form (Timeline removed) -->
+          <div class="iep-form-container" id="iepForm">
+            <div class="form-header">
+              <h2>Maryland IEP - Individualized Education Program</h2>
+              <p>Generated from IEP Team Meeting - November 15, 2024</p>
+            </div>
+            <div class="form-tabs" id="formTabs"></div>
+            <div class="form-content" id="formPages"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showView(viewName) {
+      document.getElementById('dashboard-view').classList.remove('active');
+      document.getElementById('iep-creator-view').classList.remove('active');
+      document.getElementById('files-view').classList.remove('active');
+
+      const mainContent = {
+        'dashboard': 'dashboard-view',
+        'iep-creator': 'iep-creator-view',
+        'files': 'files-view'
+      }[viewName];
+
+      if (mainContent) document.getElementById(mainContent).classList.add('active');
+
+      // Sidebar active highlight
+      document.querySelectorAll('.sidebar .nav-item').forEach(li => li.classList.remove('active'));
+      const map = { 'dashboard': 0, 'iep-creator': 1, 'files': 2 };
+      const idx = map[viewName];
+      if (typeof idx === 'number') {
+        const li = document.querySelectorAll('.sidebar .nav-item')[idx];
+        li && li.classList.add('active');
+      }
+    }
+
+    function startDemo() {
+      const upload = document.getElementById('uploadSection');
+      const proc = document.getElementById('processingSection');
+      const form = document.getElementById('iepForm');
+      upload.style.display = 'none';
+      proc.style.display = 'block';
+      setTimeout(() => {
+        proc.style.display = 'none';
+        form.style.display = 'block';
+        initializeFormTabs();
+      }, 1200);
+    }
+
+    function initializeFormTabs() {
+      const tabs = document.getElementById('formTabs');
+      const pages = document.getElementById('formPages');
+      tabs.innerHTML = '';
+      pages.innerHTML = '';
+
+      const labels = [
+        'Page 1: Student Information',
+        'Page 2: Meeting & Identifying Info',
+        'Page 3: Meeting & Identifying Info',
+        'Page 4: Meeting & Identifying Info',
+        'Page 5: Meeting & Identifying Info',
+        'Page 6: Present Levels',
+        'Page 7: Present Levels',
+        'Page 8: Present Levels',
+        'Page 9: Present Levels',
+        'Page 10: Services',
+        'Page 11: Special Considerations II',
+        'Page 12: Accessibility Features I',
+        'Page 13: Accessibility Features II',
+        'Page 14: Accommodations: Presentation',
+        'Page 15: Accommodations: Response',
+        'Page 16: Timing Accommodations',
+        'Page 17: Instructional Supports',
+        'Page 18: Program Modifications',
+        'Page 19: Social/Behavior Supports',
+        'Page 20: Physical/Environmental Supports',
+        'Page 21: School Personnel/Parental Supports',
+        'Page 22: Extended School Year (ESY)',
+        'Page 23: Transition – Preferences & Goals',
+        'Page 24: Transition Activities I',
+        'Page 25: Transition Activities II',
+        'Page 26: Transition Activities III',
+        'Page 27: Transition Agency Linkage',
+        'Page 28: Goals – Goal Sheet',
+        'Page 29: Services – Special Education',
+        'Page 30: Services – Related Services',
+        'Page 31: Services – CTE',
+        'Page 32: Placement Data (LRE)',
+        'Page 33: Authorization – Consent',
+        'Page 34: Authorization – Medical Assistance'
+      ];
+
+      function makeTab(idx, text) {
+        const btn = document.createElement('button');
+        btn.className = 'form-tab';
+        btn.textContent = text;
+        btn.setAttribute('data-page', 'page' + (idx + 1));
+        btn.addEventListener('click', () => activate('page' + (idx + 1)));
+        return btn;
+      }
+
+      function makePage(idx) {
+        const page = document.createElement('div');
+        page.className = 'form-page';
+        page.id = 'page' + (idx + 1);
+        if (idx === 0) {
+          page.innerHTML = `
+            <div class="form-section">
+              <h3 class="section-title">I. MEETING AND IDENTIFYING INFORMATION</h3>
+              <div class="form-row-3">
+                <div class="form-group"><label class="form-label">Name:</label><input class="form-input" type="text" value="Thompson, Michael J." readonly></div>
+                <div class="form-group"><label class="form-label">Agency:</label><input class="form-input" type="text" value="Montgomery County Public Schools" readonly></div>
+                <div class="form-group"><label class="form-label">IEP Team Meeting Date:</label><input class="form-input" type="date" value="2024-11-15" readonly></div>
+              </div>
+            </div>
+          `;
+        } else {
+          page.innerHTML = `<div class="form-section"><h3 class="section-title">${labels[idx]}</h3><textarea class="form-textarea" rows="8" placeholder="Content for ${labels[idx]}..."></textarea></div>`;
+        }
+        return page;
+      }
+
+      labels.forEach((label, idx) => {
+        tabs.appendChild(makeTab(idx, label));
+        pages.appendChild(makePage(idx));
+      });
+
+      function activate(pageId) {
+        pages.querySelectorAll('.form-page').forEach(p => p.classList.toggle('active', p.id === pageId));
+        tabs.querySelectorAll('.form-tab').forEach(t => t.classList.toggle('active', t.getAttribute('data-page') === pageId));
+      }
+      window.activate = activate;
+
+      activate('page1');
+      tabs.querySelector('.form-tab')?.classList.add('active');
+    }
+
+    // Build files list
+    (function buildFiles(){
+      const list = document.getElementById('filesList');
+      const files = [
+        { name: 'IEP_v15.html', action: () => alert("You're viewing it now.") },
+        { name: 'Student_123_IEP.pdf', action: () => alert('Open Student_123_IEP.pdf') },
+        { name: 'Meeting_Notes_2024-11-15.docx', action: () => alert('Open Meeting_Notes_2024-11-15.docx') }
+      ];
+      files.forEach(f => {
+        const li = document.createElement('li'); li.className = 'file-item';
+        const left = document.createElement('div'); left.textContent = f.name;
+        const right = document.createElement('div');
+        const btn = document.createElement('button'); btn.className = 'btn'; btn.textContent = 'Open'; btn.addEventListener('click', f.action);
+        right.appendChild(btn);
+        li.appendChild(left); li.appendChild(right); list.appendChild(li);
+      });
+    })();
+
+    // Standalone timeline window built from this document
+    function openTimelineWindow(){
+      const w = window.open('', '_blank', 'noopener,noreferrer');
+      if (!w) return;
+      const html = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Timeline Tracker</title>
+<style>
+  :root{--bg:#0b1220;--card:#121a2b;--text:#e8eef8;--muted:#9fb3c8;--accent:#6ee7ff;--warn:#fb923c;--danger:#f87171;--border:#22304a;--shadow:0 10px 25px rgba(0,0,0,.25)}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+  .card{background:var(--card);box-shadow:var(--shadow);border-radius:16px;padding:16px;border:1px solid var(--border)}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .field{flex:1 1 220px;display:flex;flex-direction:column;gap:6px}
+  label{font-weight:600;color:var(--muted);font-size:13px}
+  input[type=date],input[type=text],select{background:#0a1020;border:1px solid var(--border);color:var(--text);padding:10px;border-radius:10px;outline:none}
+  .persona{display:flex;gap:8px;margin-top:6px}
+  .persona button{background:#0a1020;color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 14px;cursor:pointer}
+  .persona button.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(110,231,255,.15)}
+  .timeline{position:relative;background:#0a1020;border:1px solid var(--border);border-radius:14px;margin-top:16px;overflow:auto;padding:22px}
+  .track{position:relative;height:6px;background:linear-gradient(90deg,#1d2a44,#20375d);border-radius:10px;margin:30px 6px;min-width:900px}
+  .tick{position:absolute;top:-12px;width:2px;height:30px;background:#33456e}
+  .marker{position:absolute;top:calc(50% - 10px);transform:translateX(-50%);background:transparent;border:none;padding:0}
+  .dot{width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid #0a1020;box-shadow:0 0 0 3px rgba(110,231,255,.18)}
+  .dot.warn{background:var(--warn)}
+  .dot.danger{background:var(--danger)}
+  .label{white-space:nowrap;transform:translate(-50%,8px);font-size:12px;color:var(--text);text-align:center}
+  .callout{position:absolute;transform:translate(-50%,-110%);background:#0a1020;border:1px solid #28406b;border-radius:12px;min-width:240px;max-width:340px;padding:10px;box-shadow:var(--shadow);display:none;z-index:10}
+  .marker:hover .callout,.marker:focus-within .callout{display:block}
+  .callout h4{margin:0 0 6px;font-size:14px}
+  .pill{display:inline-block;border:1px solid #28406b;border-radius:999px;padding:2px 8px;font-size:11px;color:var(--muted);margin-right:6px}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .leg{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px}
+  .key{width:10px;height:10px;border-radius:50%}
+  .grid{display:grid;grid-template-columns:1fr 1fr; gap:12px;margin-top:10px}
+  .btn{background:var(--accent);color:#001018;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+  @media (max-width:800px){ .grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="row">
+        <div class="field"><label>IEP Meeting Date</label><input id="tl_meetingDate" type="date"></div>
+        <div class="field"><label>Eligibility Decision Date</label><input id="tl_eligDate" type="date"></div>
+        <div class="field"><label>Signed Consent (Initial Evaluation)</label><input id="tl_consentDate" type="date"></div>
+        <div class="field"><label>Team Decision for Updated Evaluations</label><input id="tl_revalDecisionDate" type="date"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Persona</label><div class="persona"><button class="active" data-persona="parent">Parent</button><button data-persona="educator">Educator</button></div></div>
+        <div class="field"><label>Business-Day Calendar</label><select id="tl_businessRegion"><option value="US">US (weekends excluded)</option></select></div>
+        <div class="field"><label>&nbsp;</label><button class="btn" id="tl_recalc">Recalculate</button></div>
+      </div>
+    </div>
+    <div class="timeline card">
+      <div class="legend"><span class="leg"><span class="key" style="background:var(--accent)"></span>Due date</span><span class="leg"><span class="key" style="background:var(--warn)"></span>Approaching (≤ 3 days)</span><span class="leg"><span class="key" style="background:var(--danger)"></span>Past due</span></div>
+      <div class="track" id="tl_track"></div>
+    </div>
+    <div class="card">
+      <div class="grid">
+        <div><h3>Tips for Parents</h3><ul><li>Keep copies of notices, drafts, and finalized IEP with Prior Written Notice (PWN).</li><li>Use the consent window to ask questions and document agreements or concerns.</li><li>Mark annual review and 3-year reevaluation now to avoid last-minute scrambling.</li></ul></div>
+        <div><h3>Tips for Educators</h3><ul><li>Send meeting notices early to honor the 10-calendar-day window.</li><li>Share draft IEP and documents 5 business days before; send final IEP/PWNs within 5 business days after the meeting.</li><li>Track evaluation consents to meet 60-day (initial) and 90-day (re-eval) completion timelines.</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <script>(function(){
+    const $ = id => document.getElementById(id);
+    const parse = s => s ? new Date(s + 'T00:00:00') : null;
+    const fmt = d => d ? d.toLocaleDateString() : '—';
+    function addCal(d,n){ let x=new Date(d); x.setDate(x.getDate()+n); return x; }
+    function addBus(d,n){ let days=0,x=new Date(d),step=n>=0?1:-1; while(days!==n){ x.setDate(x.getDate()+step); const dow=x.getDay(); if(dow!==0&&dow!==6){ days+=step; } } return x; }
+    function dd(a,b){ const ms=86400000; return Math.round((a-b)/ms); }
+    const COPY={ parent:{ meetingNotice:"School sends IEP meeting notice (10 calendar days before).", draftIEP:"Receive draft IEP & documents (5 business days before meeting).", finalIEP:"Receive finalized IEP and PWNs (within 5 business days after meeting).", consent:"You may consent or refuse proposed items (within 15 business days after meeting).", developed:"IEP must be developed within 30 calendar days after eligibility determination.", initialEval:"Initial evaluation completed within 60 calendar days of signed consent.", reevaluation:"Reevaluation (if required) completed within 90 calendar days of Team decision.", annual:"IEP is reviewed and updated at least annually.", triennial:"Eligibility & educational needs reviewed at least every 3 years." }, educator:{ meetingNotice:"Send IEP meeting notice (10 calendar days before).", draftIEP:"Provide draft IEP & relevant documents (5 business days before).", finalIEP:"Send finalized IEP and PWNs (within 5 business days after).", consent:"Collect parent consent/refusal (within 15 business days after meeting).", developed:"Develop the IEP within 30 calendar days after eligibility determination.", initialEval:"Complete initial evaluation within 60 calendar days of signed consent.", reevaluation:"Complete reevaluation within 90 calendar days of Team decision (if needed).", annual:"Schedule & complete annual IEP review.", triennial:"Ensure reevaluation at least every 3 years." } };
+    function color(d){ if(!d) return ''; const days=Math.round((d-new Date())/86400000); if(days<0) return 'danger'; if(days<=3) return 'warn'; return ''; }
+    function render(){
+      const m=parse($("tl_meetingDate").value);
+      const elig=parse($("tl_eligDate").value);
+      const consent=parse($("tl_consentDate").value);
+      const reval=parse($("tl_revalDecisionDate").value);
+      const persona = document.querySelector('.persona button.active')?.dataset.persona||'parent';
+      const items=[];
+      if(m){ items.push({id:'notice',date:addCal(m,-10),title:'Meeting Notice (10 calendar days before)',copy:COPY[persona].meetingNotice}); items.push({id:'draft',date:addBus(m,-5),title:'Draft IEP/Docs (5 business days before)',copy:COPY[persona].draftIEP}); items.push({id:'final',date:addBus(m,5),title:'Final IEP & PWN (≤ 5 business days after)',copy:COPY[persona].finalIEP}); items.push({id:'consent',date:addBus(m,15),title:'Consent Window (≤ 15 business days after)',copy:COPY[persona].consent}); }
+      if(elig){ items.push({id:'develop',date:addCal(elig,30),title:'IEP Developed (≤ 30 calendar days)',copy:COPY[persona].developed}); items.push({id:'annual',date:addCal(elig,365),title:'Annual Review (approx.)',copy:COPY[persona].annual}); }
+      if(consent){ items.push({id:'initialEval',date:addCal(consent,60),title:'Initial Evaluation (≤ 60 calendar days)',copy:COPY[persona].initialEval}); }
+      if(reval){ items.push({id:'reevaluation',date:addCal(reval,90),title:'Reevaluation (≤ 90 calendar days)',copy:COPY[persona].reevaluation}); }
+      const track = $("tl_track"); track.innerHTML='';
+      const now = new Date(); const minDate = (items.map(i=>i.date).filter(Boolean).sort((a,b)=>a-b)[0]) || now; const maxDate = (items.map(i=>i.date).filter(Boolean).sort((a,b)=>b-a)[0]) || now; const span = Math.max(1,(maxDate-minDate)/86400000);
+      for(let i=0;i<=10;i++){ const x=i/10*100; const t=document.createElement('div'); t.className='tick'; t.style.left=x+'%'; track.appendChild(t); }
+      items.forEach(it=>{ const pct = ((it.date - minDate)/86400000)/span*100; const btn=document.createElement('button'); btn.className='marker'; btn.style.left=pct+'%'; const dot=document.createElement('div'); dot.className='dot '+color(it.date); const label=document.createElement('div'); label.className='label'; label.innerHTML = `${it.title}<br><span style="color:#9fb3c8">${fmt(it.date)}</span>`; const call=document.createElement('div'); call.className='callout'; call.innerHTML = `<h4>${it.title}</h4><div class="pill">Due: ${fmt(it.date)}</div><div>${it.copy}</div>`; btn.appendChild(dot); btn.appendChild(label); btn.appendChild(call); track.appendChild(btn); });
+    }
+    document.addEventListener('click',(e)=>{ const b=e.target.closest('.persona button'); if(!b) return; document.querySelectorAll('.persona button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render(); });
+    ['tl_meetingDate','tl_eligDate','tl_consentDate','tl_revalDecisionDate'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.addEventListener('input',render); }});
+    document.getElementById('tl_recalc')?.addEventListener('click',render);
+    render();
+  })();</script>
+</body>
+</html>`;
+      w.document.open(); w.document.write(html); w.document.close();
+    }
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IEP v15 (Single Document)</title>
   <style>
     :root {
