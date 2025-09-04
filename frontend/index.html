@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>IEP.AI</title>
+	<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+	<div class="layout">
+		<aside class="sidebar">
+			<div class="logo">IEP.AI</div>
+			<nav class="nav-menu">
+				<button class="nav-item active" data-view="dashboard">Dashboard</button>
+				<button class="nav-item" data-view="new-iep">Create New IEP</button>
+				<button class="nav-item" data-view="timeline">Timeline Tracker</button>
+				<button class="nav-item" data-view="qa">Q&A Assistant</button>
+				<button class="nav-item" data-view="resources">Resources</button>
+				<button class="nav-item" data-view="meetings">Meeting Coordination</button>
+				<button class="nav-item" data-view="calendar">Calendar</button>
+				<button class="nav-item" data-view="reports">Reports</button>
+				<button class="nav-item" data-view="settings">Settings</button>
+			</nav>
+		</aside>
+		<main class="content">
+			<header class="topbar">
+				<div class="user">Sarah Johnson</div>
+			</header>
+
+			<section id="view-dashboard" class="view active">
+				<h1>Welcome back, Sarah!</h1>
+				<p>Here's your IEP management overview for Montgomery County</p>
+				<div class="cards">
+					<div class="card"><div class="num" id="stat-active">--</div><div class="label">Active IEPs</div></div>
+					<div class="card"><div class="num" id="stat-due">--</div><div class="label">Due This Month</div></div>
+					<div class="card"><div class="num" id="stat-meetings">--</div><div class="label">Meetings Scheduled</div></div>
+					<div class="card"><div class="num" id="stat-reviews">--</div><div class="label">Pending Reviews</div></div>
+				</div>
+				<div class="panel">
+					<h2>Recent Activity</h2>
+					<ul id="recent-list" class="activity"></ul>
+				</div>
+				<div class="panel">
+					<h2>Students</h2>
+					<div class="toolbar"><input id="student-search" placeholder="Search students..." /></div>
+					<table class="table" id="students-table">
+						<thead>
+							<tr>
+								<th data-key="studentName">Student Name</th>
+								<th data-key="currentStage">Current Stage</th>
+								<th data-key="fileLastModified">File Last Modified</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</section>
+
+			<section id="view-new-iep" class="view">
+				<h1>Create New IEP</h1>
+				<form id="form-new-iep" class="form">
+					<label>Student Name<input name="studentName" required /></label>
+					<label>Parent/Guardian Name<input name="parentName" required /></label>
+					<label>Additional Info<textarea name="additionalInfo" rows="4"></textarea></label>
+					<div class="actions">
+						<button type="submit" class="primary">Save & Continue</button>
+					</div>
+				</form>
+			</section>
+
+			<section id="view-timeline" class="view">
+				<h1>Timeline Tracker</h1>
+				<p>Coming soon.</p>
+			</section>
+
+			<section id="view-qa" class="view">
+				<h1>Q&A Assistant</h1>
+				<p>This feature is currently inactive.</p>
+			</section>
+
+			<section id="view-resources" class="view">
+				<h1>Resources</h1>
+				<form id="form-upload" class="form inline">
+					<input type="text" name="title" placeholder="Title (optional)" />
+					<input type="file" name="file" />
+					<button class="primary" type="submit">Upload</button>
+				</form>
+				<div class="toolbar">
+					<input id="resource-search" placeholder="Search resources..." />
+				</div>
+				<ul id="resource-list" class="resources"></ul>
+			</section>
+
+			<section id="view-meetings" class="view">
+				<h1>Meeting Coordination</h1>
+				<form id="form-meeting" class="form">
+					<label>Invitee Emails (comma-separated)<input name="emails" placeholder="parent@example.com, teacher@example.com" /></label>
+					<label>Meeting Type
+						<select name="meetingType">
+							<option>Initial IEP consultation</option>
+							<option>scheduled follow up</option>
+							<option>Other</option>
+						</select>
+					</label>
+					<label>Duration (minutes)<input name="durationMinutes" type="number" min="15" step="5" value="45" /></label>
+					<div class="actions">
+						<button type="submit" class="primary">Schedule Meeting</button>
+					</div>
+				</form>
+				<div class="panel">
+					<h2>Upcoming Meetings</h2>
+					<ul id="meetings-list" class="activity"></ul>
+				</div>
+			</section>
+
+			<section id="view-calendar" class="view">
+				<h1>Calendar</h1>
+				<p>For now, use the "Add to Google Calendar" links generated when scheduling a meeting. Full sync coming soon.</p>
+				<ul id="calendar-list" class="activity"></ul>
+			</section>
+
+			<section id="view-reports" class="view">
+				<h1>Reports</h1>
+				<p>Static for now.</p>
+			</section>
+
+			<section id="view-settings" class="view">
+				<h1>Settings</h1>
+				<p>Static for now.</p>
+			</section>
+		</main>
+	</div>
+
+	<script src="/js/app.js"></script>
+</body>
+</html> 
